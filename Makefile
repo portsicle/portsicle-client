@@ -1,5 +1,5 @@
 APP_NAME = portsicle-client
-PKG_DIRS = .
+PKG_DIRS = ./cmd
 OUTPUT_DIR = ./bin
 GO_FILES = $(shell find $(PKG_DIRS) -type f -name '*.go')
 
