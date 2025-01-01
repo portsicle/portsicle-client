@@ -94,10 +94,10 @@ server.listen(port, () => {
 });
 ```
 
-3. With this minimal setup ypur build will be served locally, Now run the `portsicle client` and mention the port on which the build is running (`3000` in this case).
+3. With this minimal setup your build will be served locally, Now run the `portsicle client` and mention the port on which the build is running (`3000` in this case).
 
 ```
 ./portsicle http -p 3000
 ```
 
-**Smilar approach can be applied for Simple Node HTML servers as well as other meta Frameworks (Vue, Svelte, etc)**
+**Similar approach can be applied for Simple Node HTML servers as well as other meta Frameworks (Vue, Svelte, etc)**
