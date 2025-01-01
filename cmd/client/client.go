@@ -21,7 +21,7 @@ type Message struct {
 	Path     string      `json:"path"`
 	Headers  http.Header `json:"headers"`
 	Body     string      `json:"body"`
-	Response *Response   `json:"response,omitempty"` // Added Response field
+	Response *Response   `json:"response,omitempty"`
 }
 
 // Response struct to capture HTTP response details
@@ -38,29 +38,29 @@ func HandleClient(port string) {
 	serverURL := "ws://horrible-maritsa-attorney-fa65d70c.koyeb.app/ws"
 	conn, _, err := websocket.DefaultDialer.Dial(serverURL, nil)
 	if err != nil {
-		log.Fatalf("Failed to connect to server: %v", err)
+		log.Fatalf("Failed to connect to remote server: %v", err)
 	}
-	log.Println("Client Connected to WebSocket server!")
+	log.Println("Connected to remote server.")
 
 	done := make(chan struct{})
 
 	go func() {
 		defer close(done)
 
-		// First message will be the session ID
+		// First message from server will be the public URL aka session ID
 		_, messageBytes, err := conn.ReadMessage()
 		if err != nil {
 			log.Printf("Error reading session ID: %v", err)
 			return
 		}
 		sessionID := strings.TrimPrefix(string(messageBytes), "Session Id: ")
-		log.Printf("Received public url: https://horrible-maritsa-attorney-fa65d70c.koyeb.app/%s", sessionID)
+		log.Printf("Your public url: https://horrible-maritsa-attorney-fa65d70c.koyeb.app/%s", sessionID)
 
 		for {
 			_, messageBytes, err := conn.ReadMessage()
 			if err != nil {
 				if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-					log.Println("Connection closed normally")
+					log.Println("Disconnectd from remote server.")
 				} else {
 					log.Println("Error reading message:", err)
 				}
@@ -69,11 +69,11 @@ func HandleClient(port string) {
 
 			var message Message
 			if err := json.Unmarshal(messageBytes, &message); err != nil {
-				log.Printf("Received non-JSON message: %s", string(messageBytes))
+				log.Printf("Received invaid response from server: %s", string(messageBytes))
 				continue
 			}
 
-			log.Printf("Received message: %+v", message)
+			// log.Printf("Received message: %+v", message)
 
 			// Make request to local server
 			client := &http.Client{
@@ -81,18 +81,18 @@ func HandleClient(port string) {
 			}
 			req, err := http.NewRequest(message.Method, fmt.Sprintf("http://localhost:%s%s", port, message.Path), bytes.NewBufferString(message.Body))
 			if err != nil {
-				log.Printf("Could not create request: %v", err)
+				log.Printf("Could not create request for local server: %v", err)
 				continue
 			}
 
-			// Add headers from the message
+			// Attach headers from the message
 			for k, v := range message.Headers {
 				req.Header.Add(k, v[0])
 			}
 
 			resp, err := client.Do(req)
 			if err != nil {
-				log.Printf("Cannot send request: %v", err)
+				log.Printf("Cannot send request to local server: %v", err)
 				continue
 			}
 
@@ -126,8 +126,9 @@ func HandleClient(port string) {
 	}()
 
 	<-interrupt
-	log.Println("Received interrupt signal. Closing connection...")
+	log.Println("Closing connection...")
 
+	// inform remote server about client conection closure
 	err = conn.WriteControl(
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Client closing connection"),
@@ -139,5 +140,5 @@ func HandleClient(port string) {
 
 	<-done
 	conn.Close()
-	log.Println("Connection closed cleanly")
+	log.Println("Thanks for using Portsicle! Have a nice day :)")
 }
