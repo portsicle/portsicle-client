@@ -1,14 +1,18 @@
 ## Portscile Client
 
-- Portsicle is a free and open-source Ngrok alternative to expose local servers online.
+- Portsicle is a **Free and Open-source Ngrok alternative** to expose local servers online.
 
 - Portsicle client allows you to use the <a href="https://github.com/portsicle/portsicle-server">Portsicle Server</a> via CLI.
 
 ## Installation
 
-- Install the provided binary from latest release.
+- Install the [latest release](https://github.com/portsicle/portsicle-client/releases) for your operating system.
 
-- Give executeable permission to the binary `chmod +x ./portsicle-client`.
+- For Linux, you may need to give executeable permission to the binary `chmod +x ./portsicle`.
+
+- For Windows, the `portsicle_win_x64.exe` file is directly executable via CLI.
+
+## Client Usage
 
 - Use the CLI to run the client:
 
@@ -16,38 +20,18 @@
 ./portsicle http -p 3000
 ```
 
-> note that `3000` is the port of your local server, which you want to expose on public network.
+- for windows:
 
-## CLI Usage
+```
+./portsicle_win_x64.exe http -p 3000
+```
+
+> note that `3000` is the port of your local server which you want to expose on public network.
+
+- for more help:
 
 ```
 ./portsicle --help
-
-Usage:
-  portsicle [command]
-
-Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  help        Help about any command
-  http        Expose local http port
-
-Flags:
-  -h, --help     help for portsicle
-  -t, --toggle   Help message for toggle
-
-Use "portsicle [command] --help" for more information about a command.
-```
-
-```
-./portsicle http --help
-Expose local http port
-
-Usage:
-  portsicle http [flags]
-
-Flags:
-  -h, --help          help for http
-  -p, --port string   Port on which your local server is listening. (default "8888")
 ```
 
 ## Guide
