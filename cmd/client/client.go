@@ -35,7 +35,7 @@ func HandleClient(port string) {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	serverURL := "ws://horrible-maritsa-attorney-fa65d70c.koyeb.app/ws"
+	serverURL := "wss://portsicle.up.railway.app/ws"
 	conn, _, err := websocket.DefaultDialer.Dial(serverURL, nil)
 	if err != nil {
 		log.Fatalf("Failed to connect to remote server: %v", err)
@@ -54,7 +54,7 @@ func HandleClient(port string) {
 			return
 		}
 		sessionID := strings.TrimPrefix(string(messageBytes), "Session Id: ")
-		log.Printf("Your public url: https://horrible-maritsa-attorney-fa65d70c.koyeb.app/%s", sessionID)
+		log.Printf("Your public url: https://portsicle.up.railway.app/%s", sessionID)
 
 		for {
 			_, messageBytes, err := conn.ReadMessage()
