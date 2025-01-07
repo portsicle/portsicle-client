@@ -35,7 +35,7 @@ func HandleClient(port string) {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	serverURL := "wss://portsicle.up.railway.app/ws"
+	serverURL := "ws://portsicle.koyeb.app/ws"
 	conn, _, err := websocket.DefaultDialer.Dial(serverURL, nil)
 	if err != nil {
 		log.Fatalf("Failed to connect to remote server: %v", err)
@@ -54,7 +54,7 @@ func HandleClient(port string) {
 			return
 		}
 		sessionID := strings.TrimPrefix(string(messageBytes), "Session Id: ")
-		log.Printf("Your public url: https://portsicle.up.railway.app/%s", sessionID)
+		log.Printf("Your public url: https://portsicle.koyeb.app/%s", sessionID)
 
 		for {
 			_, messageBytes, err := conn.ReadMessage()
@@ -92,8 +92,12 @@ func HandleClient(port string) {
 
 			resp, err := client.Do(req)
 			if err != nil {
-				log.Printf("Cannot send request to local server: %v", err)
-				continue
+				log.Printf("Failed to connect to the local server. Is it running?")
+
+				// assuming that the user has stopped the local server but still trying to access the remote url
+				// As of now, I've decided to stop the client and close the connection in such case.
+				conn.Close()
+				os.Exit(1)
 			}
 
 			// Read response body
