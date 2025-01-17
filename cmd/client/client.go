@@ -44,6 +44,55 @@ func HandleClient(port string) {
 
 	done := make(chan struct{})
 
+	// Setup ping handler
+	conn.SetPingHandler(func(appData string) error {
+		log.Println("server: ping")
+		err := conn.WriteControl(websocket.PongMessage, []byte{}, time.Now().Add(10*time.Second))
+		if err != nil {
+			log.Printf("Error sending pong: %v", err)
+			return err
+		}
+		return nil
+	})
+
+	// Setup pong handler to reset the read deadline
+	conn.SetPongHandler(func(string) error {
+		log.Println("server: pong")
+		err := conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		if err != nil {
+			log.Printf("Error setting read deadline: %v", err)
+			return err
+		}
+		return nil
+	})
+
+	// Initial read deadline
+	err = conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	if err != nil {
+		log.Printf("Error setting initial read deadline: %v", err)
+		return
+	}
+
+	// this Keepalive ping will avoid the 1006 abnormal connection closure: EOF
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				log.Println("client: ping")
+				err := conn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(10*time.Second))
+				if err != nil {
+					log.Printf("Error sending ping: %v", err)
+					return
+				}
+			}
+		}
+	}()
+
 	go func() {
 		defer close(done)
 
@@ -64,6 +113,13 @@ func HandleClient(port string) {
 				} else {
 					log.Println("Error reading message:", err)
 				}
+				return
+			}
+
+			// Reset read deadline after successful read
+			err = conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+			if err != nil {
+				log.Printf("Error resetting read deadline: %v", err)
 				return
 			}
 
