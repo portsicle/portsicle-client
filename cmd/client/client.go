@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/shamaton/msgpack/v2"
 )
 
 // Message struct to match the server's message structure
@@ -124,7 +124,7 @@ func HandleClient(port string) {
 			}
 
 			var message Message
-			if err := json.Unmarshal(messageBytes, &message); err != nil {
+			if err := msgpack.Unmarshal(messageBytes, &message); err != nil {
 				log.Printf("Received invaid response from server: %s", string(messageBytes))
 				continue
 			}
@@ -172,7 +172,7 @@ func HandleClient(port string) {
 			}
 
 			// Send response back through WebSocket
-			responseBytes, err := json.Marshal(message)
+			responseBytes, err := msgpack.Marshal(message)
 			if err != nil {
 				log.Printf("Error marshaling response: %v", err)
 				continue

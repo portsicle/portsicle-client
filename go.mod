@@ -2,7 +2,10 @@ module github.com/portsicle/portsicle-client
 
 go 1.23.4
 
-require github.com/gorilla/websocket v1.5.3
+require (
+	github.com/gorilla/websocket v1.5.3
+	github.com/shamaton/msgpack/v2 v2.2.2
+)
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
