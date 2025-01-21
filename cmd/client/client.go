@@ -35,7 +35,7 @@ func HandleClient(port string) {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	serverURL := "ws://portsicle.koyeb.app/ws"
+	serverURL := "wss://portsicle.koyeb.app/ws"
 	conn, _, err := websocket.DefaultDialer.Dial(serverURL, nil)
 	if err != nil {
 		log.Fatalf("Failed to connect to remote server: %v", err)
@@ -44,16 +44,12 @@ func HandleClient(port string) {
 
 	done := make(chan struct{})
 
-	// Setup ping handler
-	conn.SetPingHandler(func(appData string) error {
-		log.Println("server: ping")
-		err := conn.WriteControl(websocket.PongMessage, []byte{}, time.Now().Add(10*time.Second))
-		if err != nil {
-			log.Printf("Error sending pong: %v", err)
-			return err
-		}
-		return nil
-	})
+	// Initial read deadline
+	err = conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	if err != nil {
+		log.Printf("Error setting initial read deadline: %v", err)
+		return
+	}
 
 	// Setup pong handler to reset the read deadline
 	conn.SetPongHandler(func(string) error {
@@ -65,13 +61,6 @@ func HandleClient(port string) {
 		}
 		return nil
 	})
-
-	// Initial read deadline
-	err = conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-	if err != nil {
-		log.Printf("Error setting initial read deadline: %v", err)
-		return
-	}
 
 	// this Keepalive ping will avoid the 1006 abnormal connection closure: EOF
 	go func() {
