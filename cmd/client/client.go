@@ -53,7 +53,7 @@ func HandleClient(port string) {
 
 	// Setup pong handler to reset the read deadline
 	conn.SetPongHandler(func(string) error {
-		log.Println("server: pong")
+		// log.Println("server: pong")
 		err := conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 		if err != nil {
 			log.Printf("Error setting read deadline: %v", err)
@@ -72,7 +72,7 @@ func HandleClient(port string) {
 			case <-done:
 				return
 			case <-ticker.C:
-				log.Println("client: ping")
+				// log.Println("client: ping")
 				err := conn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(10*time.Second))
 				if err != nil {
 					log.Printf("Error sending ping: %v", err)
@@ -167,7 +167,7 @@ func HandleClient(port string) {
 				continue
 			}
 
-			if err := conn.WriteMessage(websocket.TextMessage, responseBytes); err != nil {
+			if err := conn.WriteMessage(websocket.TextMessage, lz4compress(responseBytes)); err != nil {
 				log.Printf("Error sending response through WebSocket: %v", err)
 				continue
 			}
