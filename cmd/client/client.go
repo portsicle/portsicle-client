@@ -167,7 +167,7 @@ func HandleClient(port string) {
 				continue
 			}
 
-			if err := conn.WriteMessage(websocket.TextMessage, lz4compress(responseBytes)); err != nil {
+			if err := conn.WriteMessage(websocket.TextMessage, responseBytes); err != nil {
 				log.Printf("Error sending response through WebSocket: %v", err)
 				continue
 			}
